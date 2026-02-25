@@ -229,8 +229,15 @@
       signOut(auth);
     });
 
+    const ALLOWED_EMAILS = ["jerome.encinares0016@gmail.com", "jstnrsdc@gmail.com"]; 
+
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        if (!ALLOWED_EMAILS.includes(user.email)) {
+          signOut(auth);
+          alert("Access denied. You are not authorized to view this dashboard.");
+          return;
+        }
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("dashboard-content").style.display = "block";
         document.getElementById("user-name").textContent = user.displayName;
