@@ -51,12 +51,14 @@
       background: var(--card-bg); 
       border-radius: 8px; 
       border: 1px solid var(--border);
-      overflow: hidden; 
+      overflow-x: auto; 
       margin-top: 20px;
+      -webkit-overflow-scrolling: touch;
     }
 
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; min-width: 400px; }
     th { background: #262626; padding: 14px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    th.center, td.center { text-align: center; }
     td { padding: 14px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
     
     .row-num { color: var(--text-muted); font-size: 0.8rem; margin-right: 2px; font-weight: normal; }
@@ -130,16 +132,8 @@
   <!-- Dashboard -->
   <div id="dashboard-content" style="display:none;">
   <div class="container">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
+    <div style="text-align:center; margin-bottom:40px;">
       <h1 style="margin:0;">RSVP DASHBOARD</h1>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <span id="user-name" style="font-size:0.85rem; color:var(--text-muted);"></span>
-        <button id="btn-signout" style="
-          background:none; border:1px solid var(--border);
-          color:var(--text-muted); padding:6px 14px;
-          border-radius:4px; font-size:0.8rem; cursor:pointer;
-        ">Sign out</button>
-      </div>
     </div>
 
     <div class="stats">
@@ -165,7 +159,7 @@
             <th style="width: 8px;">#</th>
             <th>Name</th>
             <th>Status</th>
-            <th>Guests</th>
+            <th class="center">Guests</th>
             <th></th>
           </tr>
         </thead>
@@ -188,13 +182,27 @@
             <th style="width: 8px;">#</th>
             <th>Name</th>
             <th>Status</th>
-            <th>Guests</th>
+            <th class="center">Guests</th>
             <th></th>
           </tr>
         </thead>
         <tbody id="archived-table-body"></tbody>
       </table>
     </div>
+  </div>
+
+  <!-- Sign Out Footer -->
+  <div style="text-align:center; padding: 40px 20px 30px;">
+    <span id="user-name" style="font-size:0.85rem; color:var(--text-muted); display:block; margin-bottom:10px;"></span>
+    <button id="btn-signout" style="
+      background:none; border:1px solid var(--border);
+      color:var(--text-muted); padding:8px 20px;
+      border-radius:4px; font-size:0.8rem; cursor:pointer;
+      transition: all 0.15s;
+    " onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444'" 
+       onmouseout="this.style.borderColor='#333';this.style.color='#a0a0a0'">
+      Sign out
+    </button>
   </div>
   </div><!-- end dashboard-content -->
 
@@ -229,7 +237,7 @@
       signOut(auth);
     });
 
-    const ALLOWED_EMAILS = ["jerome.encinares0016@gmail.com", "jstnrsdc@gmail.com"]; 
+     const ALLOWED_EMAILS = ["jerome.encinares0016@gmail.com", "jstnrsdc@gmail.com"]; 
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -319,7 +327,7 @@
             <td><span class="row-num">${activeIndex}</span></td>
             <td><strong>${listDisplayName}</strong></td>
             <td><span class="badge ${isAttending ? 'badge-yes' : 'badge-no'}">${isAttending ? 'Attending' : 'No'}</span></td>
-            <td>${rsvp.guestCount || 0}</td>
+            <td class="center">${rsvp.guestCount || 0}</td>
             <td><button class="btn-archive">Archive</button></td>`;
           row.querySelector(".btn-archive").addEventListener("click", () => setArchived(rsvp.id, true));
           tableBody.appendChild(row);
@@ -350,7 +358,7 @@
             <td><span class="row-num">${archivedIndex}</span></td>
             <td><strong>${listDisplayName}</strong></td>
             <td><span class="badge ${isAttending ? 'badge-yes' : 'badge-no'}">${isAttending ? 'Attending' : 'No'}</span></td>
-            <td>${rsvp.guestCount || 0}</td>
+            <td class="center">${rsvp.guestCount || 0}</td>
             <td><button class="btn-restore">Restore</button></td>`;
           row.querySelector(".btn-restore").addEventListener("click", () => setArchived(rsvp.id, false));
           archivedBody.appendChild(row);
