@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RSVP Management Dashboard | Dark Mode</title>
+  <style>
+    :root {
+      --bg-dark: #121212;
+      --card-bg: #1e1e1e;
+      --border: #333333;
+      --text-main: #f0f0f0;
+      --text-muted: #a0a0a0;
+      --accent: #ffffff;
+      --success: #10b981;
+      --danger: #ef4444;
+    }
+
+    body { 
+      font-family: 'Inter', -apple-system, sans-serif; 
+      padding: 40px 20px; 
+      background: var(--bg-dark); 
+      color: var(--text-main);
+      line-height: 1.6;
+    }
+
+    .container { max-width: 1000px; margin: 0 auto; }
+    
+    h1 { text-align: center; font-weight: 700; font-size: 2.2rem; margin-bottom: 40px; color: var(--accent); letter-spacing: -0.02em; }
+    h2 { margin-top: 50px; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+
+    .stats { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 15px; 
+      margin-bottom: 40px; 
+    }
+    
+    .stat { 
+      background: var(--card-bg); 
+      padding: 20px; 
+      border-radius: 8px; 
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .stat strong { display: block; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; margin-bottom: 8px; }
+    .stat span { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+
+    .table-container { 
+      background: var(--card-bg); 
+      border-radius: 8px; 
+      border: 1px solid var(--border);
+      overflow: hidden; 
+      margin-top: 20px;
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #262626; padding: 14px; text-align: left; font-size: 0.85rem; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    td { padding: 14px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+    
+    .row-num { color: var(--text-muted); font-size: 0.8rem; margin-right: 2px; font-weight: normal; }
+
+    .badge { padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .badge-yes { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid var(--success); }
+    .badge-no { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid var(--danger); }
+
+    /* Message Styling */
+    .message-cell { padding: 20px 14px 10px 14px !important; } /* Back to 20px spacing */
+    .note-header { display: block; margin-bottom: 4px; }
+    .note-text { color: var(--text-muted); font-style: italic; display: block; margin: 12px 0; font-size: 0.9rem; }
+    
+    .footer-row { display: flex; justify-content: flex-end; margin-top: 5px; }
+    .timestamp { font-size: 0.60rem; color: var(--text-muted); font-weight: 300; opacity: 0.7; }
+
+    .btn-archive {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.15s;
+    }
+    .btn-archive:hover { border-color: var(--danger); color: var(--danger); }
+
+    .btn-restore {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.15s;
+    }
+    .btn-restore:hover { border-color: var(--success); color: var(--success); }
+
+    .archived-row td { opacity: 0.5; }
+
+    @media (max-width: 600px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+      th, td { padding: 10px; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="login-screen" style="display:flex; align-items:center; justify-content:center; min-height:100vh; flex-direction:column; gap:20px;">
+    <h1 style="margin:0;">RSVP DASHBOARD</h1>
+    <p style="color:var(--text-muted); margin:0;">Sign in to access the dashboard</p>
+    <button id="btn-signin" style="
+      display:flex; align-items:center; gap:10px;
+      background:#fff; color:#333; border:none;
+      padding:12px 24px; border-radius:6px;
+      font-size:0.95rem; font-weight:600; cursor:pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    ">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Sign in with Google
+    </button>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard-content" style="display:none;">
+  <div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:40px;">
+      <h1 style="margin:0;">RSVP DASHBOARD</h1>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span id="user-name" style="font-size:0.85rem; color:var(--text-muted);"></span>
+        <button id="btn-signout" style="
+          background:none; border:1px solid var(--border);
+          color:var(--text-muted); padding:6px 14px;
+          border-radius:4px; font-size:0.8rem; cursor:pointer;
+        ">Sign out</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <strong>Total RSVPs</strong> <span id="total-rsvps">0</span>
+      </div>
+      <div class="stat">
+        <strong>Attending</strong> <span id="attending-count">0</span>
+      </div>
+      <div class="stat">
+        <strong>Declined</strong> <span id="not-attending-count">0</span>
+      </div>
+      <div class="stat">
+        <strong>Guest Count</strong> <span id="total-guests">0</span>
+      </div>
+    </div>
+
+    <h2>Guest List</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 8px;">#</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Guests</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="rsvp-table-body"></tbody>
+      </table>
+    </div>
+
+    <h2>Guest Messages</h2>
+    <div class="table-container">
+      <table>
+        <tbody id="notes-table-body"></tbody>
+      </table>
+    </div>
+
+    <h2>Guest Archived Response</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 8px;">#</th>
+            <th>Name</th>
+            <th>Status</th>
+            <th>Guests</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="archived-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+  </div><!-- end dashboard-content -->
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-auth.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjp0DvbPWSO9PJCscO2PZDHmYCOxBfoa8",
+      authDomain: "rsvp-app-cafd2.firebaseapp.com",
+      projectId: "rsvp-app-cafd2",
+      storageBucket: "rsvp-app-cafd2.firebasestorage.app",
+      messagingSenderId: "1046629958084",
+      appId: "1:1046629958084:web:23772b022b2b3dc8a9a491"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const rsvpCollection = collection(db, "rsvps");
+    const rsvpQuery = query(rsvpCollection, orderBy("submittedAt", "asc"));
+
+    let unsubscribeSnapshot = null;
+
+    document.getElementById("btn-signin").addEventListener("click", () => {
+      signInWithPopup(auth, provider).catch(err => console.error(err));
+    });
+
+    document.getElementById("btn-signout").addEventListener("click", () => {
+      signOut(auth);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("dashboard-content").style.display = "block";
+        document.getElementById("user-name").textContent = user.displayName;
+
+        if (!unsubscribeSnapshot) {
+          unsubscribeSnapshot = onSnapshot(rsvpQuery, (snapshot) => {
+            const rsvps = [];
+            snapshot.forEach(doc => rsvps.push({ id: doc.id, ...doc.data() }));
+            updateDashboard(rsvps);
+          });
+        }
+      } else {
+        document.getElementById("login-screen").style.display = "flex";
+        document.getElementById("dashboard-content").style.display = "none";
+        if (unsubscribeSnapshot) { unsubscribeSnapshot(); unsubscribeSnapshot = null; }
+      }
+    });
+
+    async function setArchived(id, value) {
+      const ref = doc(db, "rsvps", id);
+      await updateDoc(ref, { archived: value });
+    }
+
+    function updateDashboard(rsvps) {
+      const tableBody = document.getElementById("rsvp-table-body");
+      const notesBody = document.getElementById("notes-table-body");
+      const archivedBody = document.getElementById("archived-table-body");
+      
+      tableBody.innerHTML = "";
+      notesBody.innerHTML = "";
+      archivedBody.innerHTML = "";
+
+      let attendingCount = 0;
+      let notAttendingCount = 0;
+      let totalGuests = 0;
+      let noteIndex = 1;
+      let activeIndex = 1;
+      let archivedIndex = 1;
+
+      rsvps.forEach((rsvp) => {
+        const fullName = rsvp.name ? rsvp.name.trim() : '';
+        const isArchived = rsvp.archived === true;
+
+        // Guest List formatting: mobile = "Jerome E.", desktop = full name
+        const nameParts = fullName.split(' ');
+        const lInitial = nameParts.length > 1 ? `${nameParts[nameParts.length - 1].charAt(0)}.` : '';
+        const abbreviated = nameParts.length > 1 ? `${nameParts[0]} ${lInitial}` : fullName;
+        const isMobile = window.innerWidth <= 600;
+        const listDisplayName = isMobile ? abbreviated : fullName;
+
+        // Message formatting: Full Name
+        const fullDisplayName = fullName;
+
+        const isAttending = rsvp.attending === "yes";
+        
+        let combinedDateTime = "No date available";
+        
+        if (rsvp.submittedAt) {
+          const dateObj = rsvp.submittedAt.toDate ? rsvp.submittedAt.toDate() : new Date(rsvp.submittedAt);
+          const datePart = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          const timePart = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+          combinedDateTime = `${datePart}  •  ${timePart}`;
+        }
+
+        // Stats exclude archived records
+        if (!isArchived) {
+          if (isAttending) {
+            attendingCount++;
+            totalGuests += (parseInt(rsvp.guestCount) || 0);
+          } else {
+            notAttendingCount++;
+          }
+        }
+
+        if (!isArchived) {
+          // Active guest list
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td><span class="row-num">${activeIndex}</span></td>
+            <td><strong>${listDisplayName}</strong></td>
+            <td><span class="badge ${isAttending ? 'badge-yes' : 'badge-no'}">${isAttending ? 'Attending' : 'No'}</span></td>
+            <td>${rsvp.guestCount || 0}</td>
+            <td><button class="btn-archive">Archive</button></td>`;
+          row.querySelector(".btn-archive").addEventListener("click", () => setArchived(rsvp.id, true));
+          tableBody.appendChild(row);
+          activeIndex++;
+
+          // Notes (only active)
+          if (rsvp.note && rsvp.note.trim() !== "") {
+            notesBody.innerHTML += `
+              <tr>
+                <td class="message-cell">
+                  <div class="note-header">
+                     <span class="row-num">${noteIndex}.</span>
+                     <strong>${fullDisplayName}</strong>
+                  </div>
+                  <div class="note-text">${rsvp.note}</div>
+                  <div class="footer-row">
+                     <span class="timestamp">${combinedDateTime}</span>
+                  </div>
+                </td>
+              </tr>`;
+            noteIndex++;
+          }
+        } else {
+          // Archived table
+          const row = document.createElement("tr");
+          row.classList.add("archived-row");
+          row.innerHTML = `
+            <td><span class="row-num">${archivedIndex}</span></td>
+            <td><strong>${listDisplayName}</strong></td>
+            <td><span class="badge ${isAttending ? 'badge-yes' : 'badge-no'}">${isAttending ? 'Attending' : 'No'}</span></td>
+            <td>${rsvp.guestCount || 0}</td>
+            <td><button class="btn-restore">Restore</button></td>`;
+          row.querySelector(".btn-restore").addEventListener("click", () => setArchived(rsvp.id, false));
+          archivedBody.appendChild(row);
+          archivedIndex++;
+        }
+      });
+
+      document.getElementById("total-rsvps").innerText = rsvps.filter(r => !r.archived).length;
+      document.getElementById("attending-count").innerText = attendingCount;
+      document.getElementById("not-attending-count").innerText = notAttendingCount;
+      document.getElementById("total-guests").innerText = totalGuests;
+    }
+  </script>
+</body>
+</html>
